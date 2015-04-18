@@ -61,7 +61,7 @@ namespace CombatSim
             TitleScroll();
             Console.WriteLine("\n                               Press Enter To Play: ");
             Console.ReadKey();
-            StoryLine();
+            //StoryLine();
 
             //set all game values initially
             BulletsLeft = 100;
@@ -128,14 +128,21 @@ namespace CombatSim
                 //if there are NO ENEMEIES LEFT or OUT OF LIFE
                 while (EnemiesLeft <= 0 || BulletsLeft <= 0)
                 {
+                    if (BulletsLeft <= 0)
+                    {
+                        BulletsLeft = 0;
+                    }
+                    if (CitiesLost == 5)
+                    {
+                        YouLose();
+                    }
                     //User loses when 5 cities are lost
-                    if (CitiesLost < 5)
+                    else if (CitiesLost < 5)
                     {
                         //when enemies are all killed
                         if (EnemiesLeft <= 0)
                         {
-                            //does not display negative numbers
-                            EnemiesLeft = 0;
+                            
                             Console.ForegroundColor = ConsoleColor.DarkCyan;
                             //you win!
                             YouWinAnimation();
@@ -156,9 +163,10 @@ namespace CombatSim
                             YouLose();
                             //ask if user wnats to keep playing
                             KeepPlaying();
-                            //reset money and ammo to default
+
                             MoneyLeft = 50;
                             BulletsLeft = 100;
+                            //reset money and ammo to default
                             CitiesLost++;
 
                         }
@@ -168,7 +176,7 @@ namespace CombatSim
             //refresh display
             HeadsUpDisplay();
             Stat();
-            string endingText = "The world will continue on in darkness...\n      ...until all of the Replicants are dead. ";
+            string endingText = "\nThe world will continue on in darkness...\n      ...until all of the Replicants are dead. ";
             //scroll text
             foreach (object c in endingText)
             {
@@ -191,12 +199,12 @@ namespace CombatSim
             //refrersh display
             HeadsUpDisplay();
             //prompt
+            KeepPlayingSelection = null;
             Console.WriteLine("\nTime to clear another city? Y/N");
             while (KeepPlayingSelection == null)
             {
                 Random rand = new Random();
                 KeepPlayingSelection = Console.ReadLine().ToUpper();
-
                 switch (KeepPlayingSelection)
                 {
                     //yes
@@ -597,6 +605,9 @@ $$\     $$\  $$$$$$\  $$\   $$\       $$\      $$\ $$$$$$\ $$\   $$\
             while (loop < 10)
             {
                 Console.Clear();
+                CityLogo();
+
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine(@"
   ▄████  ▄▄▄       ███▄ ▄███▓▓█████     ▒█████   ██▒   █▓▓█████  ██▀███  
  ██▒ ▀█▒▒████▄    ▓██▒▀█▀ ██▒▓█   ▀    ▒██▒  ██▒▓██░   █▒▓█   ▀ ▓██ ▒ ██▒
@@ -611,13 +622,18 @@ $$\     $$\  $$$$$$\  $$\   $$\       $$\      $$\ $$$$$$\ $$\   $$\
 ");
                 Thread.Sleep(200);
                 Console.Clear();
+                CityLogo();
+
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine(@"
 ");
                 Thread.Sleep(200);
                 loop++;
 
             }
-            HeadsUpDisplay();
+            CityLogo();
+
+            Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine(@"
   ▄████  ▄▄▄       ███▄ ▄███▓▓█████     ▒█████   ██▒   █▓▓█████  ██▀███  
  ██▒ ▀█▒▒████▄    ▓██▒▀█▀ ██▒▓█   ▀    ▒██▒  ██▒▓██░   █▒▓█   ▀ ▓██ ▒ ██▒
@@ -646,7 +662,11 @@ $$\     $$\  $$$$$$\  $$\   $$\       $$\      $$\ $$$$$$\ $$\   $$\
                 //automatic gun
                 case 1:
                     HeadsUpDisplay();
-                    Console.WriteLine("The ADP: \nCost: 5 Bullets \nChance to Hit: 70% \nMax Damage: 40");
+                    Console.WriteLine(@"
+      THE ADP:
+         Cost: 5 Bullets 
+Chance to Hit: 70% 
+   Max Damage: 40");
                     Console.WriteLine("\nDo you want to continue using the ADP? Y/N");
                     //Are you sure?
                     UserConfirmation = null;
@@ -731,7 +751,11 @@ $$\     $$\  $$$$$$\  $$\   $$\       $$\      $$\ $$$$$$\ $$\   $$\
                 //Pistol 100% chance to hit
                 case 2:
                     HeadsUpDisplay();
-                    Console.WriteLine(".45 Cal Anti-Matter Pistol: \nCost: 2 Bullets \nChance to Hit: 100 \nMax Damage: 25");
+                    Console.WriteLine(@"
+.45 Cal ANTI-MATTER PISTOL: 
+                      Cost: 2 Bullets 
+             Chance to Hit: 100 
+                Max Damage: 25");
                     Console.WriteLine("\nDo you want to continue using the Side-Arm? Y/N");
                     UserConfirmation = null;
                     while (UserConfirmation == null)
@@ -881,7 +905,11 @@ $$\     $$\  $$$$$$\  $$\   $$\       $$\      $$\ $$$$$$\ $$\   $$\
                 //KATANA!!!!!!!!!!!
                 case 4:
                     HeadsUpDisplay();
-                    Console.WriteLine("KATANA:\nCost: Free\nChance to Hit: 35% \nMax Damage: 100");
+                    Console.WriteLine(@"
+       KATANA:
+         Cost: Free
+Chance to Hit: 35% 
+   Max Damage: 100");
                     Console.WriteLine("\nDo you want to continue using the KATANA? Y/N");
                     UserConfirmation = null;
                     while (UserConfirmation == null)
@@ -1873,7 +1901,9 @@ SSS            WXXXXXXW
             int totalStat = totalDmg / totalAtk;
             CityLogo();
             TitleScroll();
-            Console.WriteLine("Cities Cleared: {0}\n Cities Lost: {1}", CitiesCleared, CitiesLost);
+            Console.WriteLine(@"
+      Cities Cleared: {0}
+         Cities Lost: {1}", CitiesCleared, CitiesLost);
             Thread.Sleep(500);
             Console.WriteLine("You did an average of {0} damage with the APD.", APDStat);
             Thread.Sleep(500);
@@ -1881,11 +1911,11 @@ SSS            WXXXXXXW
             Thread.Sleep(500);
             Console.WriteLine("You did an average of {0} damage with the KATANA.", pistolStat);
             Thread.Sleep(500);
-            Console.WriteLine("You bought {0} supply crates.", buyAmmo);
+            Console.WriteLine("           You bought {0} supply crates.", buyAmmo);
             Thread.Sleep(500);
-            Console.WriteLine("You earned ${0}.", CashEarned);
+            Console.WriteLine("          You earned ${0}.", CashEarned);
             Thread.Sleep(500);
-            Console.WriteLine("You did an overall average of {0} damage.", totalStat);
+            Console.WriteLine("\nYou did an overall average of {0} damage.", totalStat);
             Thread.Sleep(500);
 
         }
