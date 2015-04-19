@@ -80,7 +80,7 @@ namespace CombatSim
             //user prompt
             Console.WriteLine("\n                               Press Enter To Play: ");
             Console.ReadKey();
-            //StoryLine();
+            StoryLine();
 
             //set all initial gam values
             BulletsLeft = 100;
