@@ -102,7 +102,7 @@ namespace CombatSim
                                                      /      . }\
 2..45 Caliber Anti-Matter Pistol                     ;--..--._|}
                                   (\                 '--/\--'  )
-3.Resupply Drop:($5)               \\                | '-'  :'|
+3.Resupply Drop:                   \\                | '-'  :'|
                                     \\               . -==- .-|
 4.Katana                             \\               \.__.'   \--._
                                      [\\          __.--|       //  _/'--.
@@ -169,6 +169,8 @@ namespace CombatSim
                             //you win!
                             YouWinAnimation();
                             Console.WriteLine("\nYou have cleared the city of Replicants!");
+                            Thread.Sleep(300);
+                            
                             //ask if user keeps playing
                             KeepPlaying();
                             //count number of cities cleared
@@ -803,6 +805,10 @@ $$\     $$\  $$$$$$\  $$\   $$\       $$\      $$\ $$$$$$\ $$\   $$\
                                 SemiAuto = rand.Next(10, 25);
                                 //enemies reduced by atk
                                 EnemiesLeft = EnemiesLeft - SemiAuto;
+                                if (EnemiesLeft <= 0)
+                                {
+                                    EnemiesLeft = 0;
+                                }
                                 //keep track of enemy kills
                                 enemiesKill = enemiesKill + SemiAuto;
                                 //stats
@@ -853,7 +859,8 @@ $$\     $$\  $$$$$$\  $$\   $$\       $$\      $$\ $$$$$$\ $$\   $$\
                         int supplyDrop = 0;
                         int newBullets = 0;
                         int numOfDrops = 0;
-                        Console.WriteLine("\nHow many supply drops would you like to call? \n         (I Drop Per $5 Increment)");
+                        Console.WriteLine("\nHow many supply drops would you like to call? \n       1 Drop: $5");
+                        Console.WriteLine("   (Select: 5, 10, 15, 20, 25 etc.)");
                         int.TryParse(Console.ReadLine(), out supplyDrop);
 
                         Console.ForegroundColor = ConsoleColor.DarkRed;
@@ -877,7 +884,7 @@ $$\     $$\  $$$$$$\  $$\   $$\       $$\      $$\ $$$$$$\ $$\   $$\
                                     while (numOfDrops > 0)
                                     {
                                         //random number of bullets awarded in bulk
-                                        newBullets = newBullets + rand.Next(5, 15);
+                                        newBullets = newBullets + rand.Next(10, 20);
                                         numOfDrops--;
                                     }
                                     //add new bullets to count
@@ -958,6 +965,10 @@ $$\     $$\  $$$$$$\  $$\   $$\       $$\      $$\ $$$$$$\ $$\   $$\
                                     katanaDmg = katanaDmg + SemiAuto;
                                     //subtract damage from enemy total
                                     EnemiesLeft = EnemiesLeft - SemiAuto;
+                                    if(EnemiesLeft< 0)
+                                    {
+                                        EnemiesLeft = 0;
+                                    }
                                     //keep track of enemy kills for kill rewards
                                     enemiesKill = enemiesKill + SemiAuto;
                                     HeadsUpDisplay();
@@ -1018,36 +1029,50 @@ Chance to Hit: 50%
                             //Yes
                             case "Y":
                                 //Grenade animation
-                                MoneyLeft = MoneyLeft - 10;
-                                ChanceToHit = rand.Next(1, 101);
-
-                                Console.ForegroundColor = ConsoleColor.DarkRed;
-                                //IF user hits
-                                if (ChanceToHit > 50)
+                                if (MoneyLeft <= 0)
                                 {
-                                    //does damage
-                                    SemiAuto = rand.Next(30, 50);
-                                    //counts grenades
-                                    GrenadeUsage++;
-                                    //stats
-                                    grenade = 3;
-                                    //subtract damage from enemy total
-                                    EnemiesLeft = EnemiesLeft - SemiAuto;
-                                    //keep track of enemy kills for kill rewards
-                                    enemiesKill = enemiesKill + SemiAuto;
                                     HeadsUpDisplay();
 
                                     Console.ForegroundColor = ConsoleColor.DarkRed;
-                                    //combat message
-                                    Console.WriteLine("\nYou killed {0} Replicants!", SemiAuto);
-                                    Console.WriteLine("\nReplicants have a reduced chance to reinforce for a while.");
+                                    Console.WriteLine("\nYou trying to cheat me, boy?\n  You aint got the funds for these munitions.");
                                 }
-                                else
+                                else if (MoneyLeft > 0)
                                 {
-                                    //combat message
-                                    HeadsUpDisplay();
-                                    Console.WriteLine("\nYour grenade missed, but the explosion can be heard for miles.");
-                                    Console.WriteLine("\nReplicants have a reduced chance to reinforce for a while.");
+                                    MoneyLeft = MoneyLeft - 10;
+                                    ChanceToHit = rand.Next(1, 101);
+
+                                    Console.ForegroundColor = ConsoleColor.DarkRed;
+                                    //IF user hits
+                                    if (ChanceToHit > 50)
+                                    {
+                                        //does damage
+                                        SemiAuto = rand.Next(30, 50);
+                                        //counts grenades
+                                        GrenadeUsage++;
+                                        //stats
+                                        grenade = 3;
+                                        //subtract damage from enemy total
+                                        EnemiesLeft = EnemiesLeft - SemiAuto;
+                                        if (EnemiesLeft < 0)
+                                        {
+                                            EnemiesLeft = 0;
+                                        }
+                                        //keep track of enemy kills for kill rewards
+                                        enemiesKill = enemiesKill + SemiAuto;
+                                        HeadsUpDisplay();
+
+                                        Console.ForegroundColor = ConsoleColor.DarkRed;
+                                        //combat message
+                                        Console.WriteLine("\nYou killed {0} Replicants!", SemiAuto);
+                                        Console.WriteLine("\nReplicants have a reduced chance to reinforce for a while.");
+                                    }
+                                    else
+                                    {
+                                        //combat message
+                                        HeadsUpDisplay();
+                                        Console.WriteLine("\nYour grenade missed, but the explosion can be heard for miles.");
+                                        Console.WriteLine("\nReplicants have a reduced chance to reinforce for a while.");
+                                    }
                                 }
                                 //keep combat messages on screen
                                 Console.WriteLine("\nPress Enter: ");
@@ -2274,15 +2299,16 @@ SSS            WXXXXXXW
             int newMoney = 0;
 
             //adds money to stash for each 25 enemies killed
-            if (enemiesKill >= 25)
+            if (enemiesKill >= 20)
             {
                 HeadsUpDisplay();
                 Console.ForegroundColor = ConsoleColor.DarkRed;
-                newMoney = enemiesKill / 25;
+                //for every 20 kills get 5 bucks
+                newMoney = enemiesKill / 20;
                 newMoney = newMoney * 5;
                 MoneyLeft = MoneyLeft + newMoney;
                 CashEarned = CashEarned + newMoney;
-                Console.WriteLine("\nYou killed more than 25 enemies.\n\n${0} added to your stash.", newMoney);
+                Console.WriteLine("\nYou killed {1} enemies.\n\n${0} added to your stash.", newMoney, enemiesKill);
                 //while subtracting 25 is not negative
                 while (enemiesKill - 25 > 0)
                 {
