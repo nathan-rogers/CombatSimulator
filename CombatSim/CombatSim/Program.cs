@@ -50,9 +50,13 @@ namespace CombatSim
         static int CashEarned = 0;
         static int grenade = 0;
         static int GrenadeUsage = 0;
-
+        static int APDAccuracy = 30;
+        static int KatAccuracy = 65;
+        static int Implants = 0;
+        static int ImplantsTotal = 0;
         static void Main(string[] args)
         {
+
             Random rand = new Random();
             //set window size
             Console.WindowHeight = 69;
@@ -92,7 +96,7 @@ namespace CombatSim
                                      [\\          __.--|       //  _/'--.
 5.Grenade                            \ \\       .'-._ ('-----'/ __/      \
                                       \ \\     /   __>|      | '--.       |
-                                       \ \\   |   \   |     /    /       /
+6.Implants                             \ \\   |   \   |     /    /       /
                                         \ '\ /     \  |     |  _/       /
                                          \  \       \ |     | /        /
                                           \  \      \        /
@@ -125,6 +129,16 @@ namespace CombatSim
                         Console.ReadKey();
                         Console.ForegroundColor = ConsoleColor.White;
                     }
+                    if (Implants > 0)
+                    {
+                        Implants--;
+
+                    }
+                    else if (Implants <= 0)
+                    {
+                        KatAccuracy = 65;
+                        APDAccuracy = 30;
+                    }
 
                 }
                 //if there are NO ENEMEIES LEFT or OUT OF LIFE
@@ -138,9 +152,13 @@ namespace CombatSim
                     {
                         EnemiesLeft = 0;
                     }
-                    if (CitiesLost == 5)
+                    if (CitiesLost == 3)
                     {
-                        YouLose();
+                        BulletsLeft = 1;
+                        EnemiesLeft = 1;
+                        ContinuePlaying = false;
+
+                        GameOverAnimation();
                     }
                     //User loses when 5 cities are lost
                     else if (CitiesLost < 5)
@@ -671,8 +689,8 @@ $$\     $$\  $$$$$$\  $$\   $$\       $$\      $$\ $$$$$$\ $$\   $$\
                     Console.WriteLine(@"
       THE ADP:
          Cost: 5 Bullets 
-Chance to Hit: 70% 
-   Max Damage: 40");
+");
+                    Console.WriteLine("\nChance to Hit: {0}\n   Max Damage: 40", 100 - APDAccuracy);
                     Console.WriteLine("\nDo you want to continue using the ADP? Y/N");
                     //Are you sure?
                     UserConfirmation = null;
@@ -697,7 +715,7 @@ Chance to Hit: 70%
                                 //user hit chance
                                 ChanceToHit = rand.Next(1, 101);
                                 //70% chance to hit
-                                if (ChanceToHit > 33)
+                                if (ChanceToHit > APDAccuracy)
                                 {
                                     //kill enemies for amount of damage done
                                     EnemiesLeft = EnemiesLeft - AutomaticFire;
@@ -762,6 +780,7 @@ Chance to Hit: 70%
                       Cost: 2 Bullets 
              Chance to Hit: 100 
                 Max Damage: 25");
+
                     Console.WriteLine("\nDo you want to continue using the Side-Arm? Y/N");
                     UserConfirmation = null;
                     while (UserConfirmation == null)
@@ -913,9 +932,8 @@ Chance to Hit: 70%
                     HeadsUpDisplay();
                     Console.WriteLine(@"
        KATANA:
-         Cost: Free
-Chance to Hit: 35% 
-   Max Damage: 100");
+         Cost: Free"); Console.WriteLine("Chance to Hit: {0}\n   Max Damage: 100", 100 - KatAccuracy);
+
                     Console.WriteLine("\nDo you want to continue using the KATANA? Y/N");
                     UserConfirmation = null;
                     while (UserConfirmation == null)
@@ -933,7 +951,7 @@ Chance to Hit: 35%
 
                                 Console.ForegroundColor = ConsoleColor.DarkRed;
                                 //IF user hits
-                                if (ChanceToHit > 65)
+                                if (ChanceToHit > KatAccuracy)
                                 {
                                     katanaAtk++;
                                     //how much damage
@@ -983,7 +1001,13 @@ Chance to Hit: 35%
          Cost: $10
 Chance to Hit: 50%
    Max Damage: 50
-        Bonus: 100% Chance to reduce enemy Reinforments for 3 rounds");
+        Bonus: 100% Chance to reduce enemy Reinforments for 3 rounds
+");
+                    //only displays while effect active
+                    if (grenade > 0)
+                    {
+                        Console.WriteLine("\nRounds Left of Bonus Effect: {0}", grenade);
+                    }
                     Console.WriteLine("\nDo you want to continue using the Grenade? Y/N");
                     UserConfirmation = null;
                     while (UserConfirmation == null)
@@ -996,7 +1020,6 @@ Chance to Hit: 50%
                             //Yes
                             case "Y":
                                 //Grenade animation
-                                GrenadeBoom();
                                 MoneyLeft = MoneyLeft - 10;
                                 ChanceToHit = rand.Next(1, 101);
 
@@ -1047,6 +1070,67 @@ Chance to Hit: 50%
                         }
                     }
                     break;
+                case 6:
+                    HeadsUpDisplay();
+                    Console.WriteLine(@"
+      IMPLANTS:
+         Cost: $50
+        Bonus: 100% Accuracy with ADP and KATANA for 5 Rounds!
+");
+                    //only displays while effect active
+                    if (Implants > 0)
+                    {
+                        Console.WriteLine("\nRounds Left of Bonus Effect: {0}", Implants);
+                    }
+                    Console.WriteLine("\nDo you wish to purchase IMPLANTS? Y/N");
+                    UserConfirmation = null;
+                    while (UserConfirmation == null)
+                    {
+
+                        UserConfirmation = Console.ReadLine().ToUpper();
+                        //are you sure?
+                        switch (UserConfirmation)
+                        {
+                            //Yes
+                            case "Y":
+                                if (MoneyLeft >= 50)
+                                {
+                                    ImplantsTotal++;
+                                    MoneyLeft = MoneyLeft - 50;
+                                    Implants = 5;
+                                    APDAccuracy = 1;
+                                    KatAccuracy = 20;
+                                    HeadsUpDisplay();
+                                    Console.WriteLine("\nYou now have perfect accuracy with the APD, \n     and improved accuracy with the KATANA for 5 rounds.");
+                                }
+                                else if (MoneyLeft < 50)
+                                {
+                                    HeadsUpDisplay();
+                                    Console.WriteLine("Don't try to cheat me. I can see you don't have enough money for those implants!");
+                                }
+                                //keep combat messages on screen
+                                Console.WriteLine("\nPress Enter: ");
+                                Console.ReadKey();
+                                EnemyAttack();
+
+                                Console.ForegroundColor = ConsoleColor.White;
+                                break;
+                            //do not continue with combat action
+                            //make new selection
+                            case "N":
+                                break;
+                            //invalid input
+                            default:
+                                Console.WriteLine("\nPlease Enter Y or N: ");
+                                UserConfirmation = null;
+                                break;
+                        }
+                    }
+
+
+
+                    break;
+
                 //user did not select 1, 2, 3, 4 or 5
                 default:
                     //User gun jams, loses 1 bullet
@@ -1100,7 +1184,7 @@ Chance to Hit: 50%
                 "The .45 Cal Anti-Matter Pistol is much more reliable, \n    but is much less effective \n      against the metallic frame of the Replicant Husks.",
                 "\n     Each attack uses ammo:  \"\"\"\"\"\"\"\"\"\"\"\"\"\"\"\"  \n            so be careful.",
                 "If you run out of ammo while there are still Replicants left to eliminate, \n    they will overwhelm the city, and eat it's remnants alive.",
-                "We cannot lose our last 5 cities, Blade Runner. \nWe're counting on you!"
+                "We cannot lose 3 of our major cities, Blade Runner. \nWe're counting on you!"
             };
             for (int i = 0; i < instructions2.Count; i++)
             {
@@ -1255,8 +1339,17 @@ Chance to Hit: 50%
             CityLogo();
             TitleScroll();
             //cities count
-            Console.WriteLine("                                             Cities Cleared: {0}", CitiesCleared);
-            Console.WriteLine("                                             Cities Lost: {0}", CitiesLost);
+            if (Implants > 0)
+            {
+
+                Console.WriteLine("Implants: (⌐■_■) on                        Cities Cleared: {0}", CitiesCleared);
+                Console.WriteLine("                                              Cities Lost: {0}", CitiesLost);
+            }
+            else if (Implants <= 0)
+            {
+                Console.WriteLine("Implants: ( o_o) off                        Cities Cleared: {0}", CitiesCleared);
+                Console.WriteLine("                                               Cities Lost: {0}", CitiesLost);
+            }
             //scroll through and ad """"" to bullets hud
             for (int i = 0; i < BulletsLeft; i += 2)
             {
@@ -1297,6 +1390,7 @@ Chance to Hit: 50%
             }
             hudReset = 0;
             Console.WriteLine("Money Left: ${1}\n{0}", moneyHud, MoneyLeft);
+
         }
         /// <summary>
         /// City image
@@ -1956,7 +2050,12 @@ SSS            WXXXXXXW
 
                 Console.ForegroundColor = ConsoleColor.DarkRed;
                 Console.WriteLine("A WAVE OF {0} REPLICANTS HAS STORMED THE CITY!!!", ChanceToHit);
+                Console.WriteLine(@"
+      @  \@/ |@__ \@ __@ __@/  @/ __@|
+    /|\  |   |    |\  /|   |  /|    |
+    / \ / \ / \  / \  / \ / \ / \  / \");
                 Console.WriteLine("       Enemy numbers reinforced!");
+
                 EnemiesLeft = EnemiesLeft + ChanceToHit;
                 Console.WriteLine("\nPress Enter: ");
                 Console.ReadKey();
@@ -2000,9 +2099,11 @@ SSS            WXXXXXXW
             Thread.Sleep(500);
             Console.WriteLine("You did an average of {0} damage with the KATANA.", pistolStat);
             Thread.Sleep(500);
-            Console.WriteLine("You bought {0} grenades", GrenadeUsage);
+            Console.WriteLine("           You bought {0} grenades", GrenadeUsage);
             Thread.Sleep(500);
             Console.WriteLine("           You bought {0} supply crates.", buyAmmo);
+            Thread.Sleep(500);
+            Console.WriteLine("             You used {0} implants.", ImplantsTotal);
             Thread.Sleep(500);
             Console.WriteLine("          You earned ${0}.", CashEarned);
             Thread.Sleep(500);
@@ -2010,8 +2111,14 @@ SSS            WXXXXXXW
             Thread.Sleep(500);
 
         }
+        /// <summary>
+        /// grenade throw animation
+        /// </summary>
         public static void GrenadeBoom()
         {
+            Console.Clear();
+            CityLogo();
+
             Console.ForegroundColor = ConsoleColor.DarkRed;
             Console.WriteLine(@"                      
                           
@@ -2056,8 +2163,7 @@ SSS            WXXXXXXW
             CityLogo();
 
             Console.ForegroundColor = ConsoleColor.DarkRed;
-            Console.WriteLine(@"
-                        
+            Console.WriteLine(@"                     
                         
                          \
                           o, 
@@ -2071,8 +2177,7 @@ SSS            WXXXXXXW
             CityLogo();
 
             Console.ForegroundColor = ConsoleColor.DarkRed;
-            Console.WriteLine(@"
-                        
+            Console.WriteLine(@"           
                         
                         
                            \ 
@@ -2086,8 +2191,7 @@ SSS            WXXXXXXW
             CityLogo();
 
             Console.ForegroundColor = ConsoleColor.DarkRed;
-            Console.WriteLine(@"
-                        
+            Console.WriteLine(@"                    
                         
                         
                         
@@ -2116,8 +2220,7 @@ SSS            WXXXXXXW
             CityLogo();
 
             Console.ForegroundColor = ConsoleColor.DarkRed;
-            Console.WriteLine(@"
-                             \         .  ./
+            Console.WriteLine(@"\         .  ./
                            \      .: ;'.:..    /
                                (M^^.^~~:.' ).
                          -   (/  .    . . \ \)  -
@@ -2131,8 +2234,7 @@ SSS            WXXXXXXW
             CityLogo();
 
             Console.ForegroundColor = ConsoleColor.DarkRed;
-            Console.WriteLine(@"
-                             \         .  ./
+            Console.WriteLine(@"        .  ./
                            \      .: ;'.:..    /
                                (M^^.^~~:.' ).
                          -   (/  .    . . \ \)  -
