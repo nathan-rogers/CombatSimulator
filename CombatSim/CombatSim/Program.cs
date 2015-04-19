@@ -1008,7 +1008,7 @@ $$\     $$\  $$$$$$\  $$\   $$\       $$\      $$\ $$$$$$\ $$\   $$\
                     Console.WriteLine(@"
       GRENADE:
          Cost: $10
-Chance to Hit: 50%
+Chance to Hit: 55%
    Max Damage: 50
         Bonus: 100% Chance to reduce enemy Reinforments for 3 rounds
 ");
@@ -1043,7 +1043,7 @@ Chance to Hit: 50%
 
                                     Console.ForegroundColor = ConsoleColor.DarkRed;
                                     //IF user hits
-                                    if (ChanceToHit > 50)
+                                    if (ChanceToHit > 45)
                                     {
                                         //does damage
                                         SemiAuto = rand.Next(30, 50);
