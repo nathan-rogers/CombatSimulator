@@ -48,6 +48,8 @@ namespace CombatSim
         static int enemiesKill = 0;
         static int buyAmmo = 0;
         static int CashEarned = 0;
+        static int grenade = 0;
+        static int GrenadeUsage = 0;
 
         static void Main(string[] args)
         {
@@ -88,7 +90,7 @@ namespace CombatSim
                                     \\               . -==- .-|
 4.Katana                             \\               \.__.'   \--._
                                      [\\          __.--|       //  _/'--.
-                                     \ \\       .'-._ ('-----'/ __/      \
+5.Grenade                            \ \\       .'-._ ('-----'/ __/      \
                                       \ \\     /   __>|      | '--.       |
                                        \ \\   |   \   |     /    /       /
                                         \ '\ /     \  |     |  _/       /
@@ -132,6 +134,10 @@ namespace CombatSim
                     {
                         BulletsLeft = 0;
                     }
+                    if (EnemiesLeft <= 0)
+                    {
+                        EnemiesLeft = 0;
+                    }
                     if (CitiesLost == 5)
                     {
                         YouLose();
@@ -142,7 +148,7 @@ namespace CombatSim
                         //when enemies are all killed
                         if (EnemiesLeft <= 0)
                         {
-                            
+
                             Console.ForegroundColor = ConsoleColor.DarkCyan;
                             //you win!
                             YouWinAnimation();
@@ -969,7 +975,79 @@ Chance to Hit: 35%
                         }
                     }
                     break;
-                //user did not select 1, 2, 3, 4
+                case 5:
+
+                    HeadsUpDisplay();
+                    Console.WriteLine(@"
+      GRENADE:
+         Cost: $10
+Chance to Hit: 50%
+   Max Damage: 50
+        Bonus: 100% Chance to reduce enemy Reinforments for 3 rounds");
+                    Console.WriteLine("\nDo you want to continue using the Grenade? Y/N");
+                    UserConfirmation = null;
+                    while (UserConfirmation == null)
+                    {
+
+                        UserConfirmation = Console.ReadLine().ToUpper();
+                        //are you sure?
+                        switch (UserConfirmation)
+                        {
+                            //Yes
+                            case "Y":
+                                //Grenade animation
+                                GrenadeBoom();
+                                MoneyLeft = MoneyLeft - 10;
+                                ChanceToHit = rand.Next(1, 101);
+
+                                Console.ForegroundColor = ConsoleColor.DarkRed;
+                                //IF user hits
+                                if (ChanceToHit > 50)
+                                {
+                                    //does damage
+                                    SemiAuto = rand.Next(30, 50);
+                                    //counts grenades
+                                    GrenadeUsage++;
+                                    //stats
+                                    grenade = 3;
+                                    //subtract damage from enemy total
+                                    EnemiesLeft = EnemiesLeft - SemiAuto;
+                                    //keep track of enemy kills for kill rewards
+                                    enemiesKill = enemiesKill + SemiAuto;
+                                    HeadsUpDisplay();
+
+                                    Console.ForegroundColor = ConsoleColor.DarkRed;
+                                    //combat message
+                                    Console.WriteLine("\nYou killed {0} Replicants!", SemiAuto);
+                                    Console.WriteLine("\nReplicants have a reduced chance to reinforce for a while.");
+                                }
+                                else
+                                {
+                                    //combat message
+                                    HeadsUpDisplay();
+                                    Console.WriteLine("\nYour grenade missed, but the explosion can be heard for miles.");
+                                    Console.WriteLine("\nReplicants have a reduced chance to reinforce for a while.");
+                                }
+                                //keep combat messages on screen
+                                Console.WriteLine("\nPress Enter: ");
+                                Console.ReadKey();
+                                EnemyAttack();
+
+                                Console.ForegroundColor = ConsoleColor.White;
+                                break;
+                            //do not continue with combat action
+                            //make new selection
+                            case "N":
+                                break;
+                            //invalid input
+                            default:
+                                Console.WriteLine("\nPlease Enter Y or N: ");
+                                UserConfirmation = null;
+                                break;
+                        }
+                    }
+                    break;
+                //user did not select 1, 2, 3, 4 or 5
                 default:
                     //User gun jams, loses 1 bullet
                     BulletsLeft = BulletsLeft - 1;
@@ -1837,6 +1915,7 @@ SSS            WXXXXXXW
             Random rand = new Random();
             ///enemies chance to hit
             int reinforcements = 0;
+            int reinforcementChance = 70;
             ChanceToHit = rand.Next(1, 101);
             //80% chance to hit
             if (ChanceToHit > 20)
@@ -1856,26 +1935,36 @@ SSS            WXXXXXXW
                     Console.WriteLine("\nA replicant attacked a civilian. \n\nYou used {0} bullets to take him down!", EnemyDamage);
                     Console.WriteLine("\nPress Enter: ");
                     Console.ReadKey();
-                    ChanceToHit = 0;
-                    //enemies have a 30% chance to reinforce their numbers
-                    reinforcements = rand.Next(1, 101);
-                    if (reinforcements > 70)
-                    {
-                        HeadsUpDisplay();
-                        //reinforce with 15-50 enemies per wave
-                        ChanceToHit = rand.Next(15, 40);
 
-                        Console.ForegroundColor = ConsoleColor.DarkRed;
-                        Console.WriteLine("A WAVE OF {0} REPLICANTS HAS STORMED THE CITY!!!", ChanceToHit);
-                        Console.WriteLine("       Enemy numbers reinforced!");
-                        EnemiesLeft = EnemiesLeft + ChanceToHit;
-                        Console.WriteLine("\nPress Enter: ");
-                        Console.ReadKey();
-
-                    }
-
-                    Console.ForegroundColor = ConsoleColor.White;
                 }
+
+            }
+            ChanceToHit = 0;
+            //enemies have a 30% chance to reinforce their numbers
+            reinforcements = rand.Next(1, 101);
+            if (grenade > 0)
+            {
+                reinforcementChance = 95;
+                grenade--;
+            }
+
+            if (reinforcements > reinforcementChance)
+            {
+                HeadsUpDisplay();
+                //reinforce with 15-50 enemies per wave
+                ChanceToHit = rand.Next(15, 40);
+
+                Console.ForegroundColor = ConsoleColor.DarkRed;
+                Console.WriteLine("A WAVE OF {0} REPLICANTS HAS STORMED THE CITY!!!", ChanceToHit);
+                Console.WriteLine("       Enemy numbers reinforced!");
+                EnemiesLeft = EnemiesLeft + ChanceToHit;
+                Console.WriteLine("\nPress Enter: ");
+                Console.ReadKey();
+
+
+
+
+                Console.ForegroundColor = ConsoleColor.White;
             }
         }
 
@@ -1911,6 +2000,8 @@ SSS            WXXXXXXW
             Thread.Sleep(500);
             Console.WriteLine("You did an average of {0} damage with the KATANA.", pistolStat);
             Thread.Sleep(500);
+            Console.WriteLine("You bought {0} grenades", GrenadeUsage);
+            Thread.Sleep(500);
             Console.WriteLine("           You bought {0} supply crates.", buyAmmo);
             Thread.Sleep(500);
             Console.WriteLine("          You earned ${0}.", CashEarned);
@@ -1918,6 +2009,140 @@ SSS            WXXXXXXW
             Console.WriteLine("\nYou did an overall average of {0} damage.", totalStat);
             Thread.Sleep(500);
 
+        }
+        public static void GrenadeBoom()
+        {
+            Console.ForegroundColor = ConsoleColor.DarkRed;
+            Console.WriteLine(@"                      
+                          
+                          
+       o,                 
+      /                  
+-O-                      
+  \                      
+  /\ ...............................
+");
+            Thread.Sleep(200);
+            Console.Clear();
+            CityLogo();
+
+            Console.ForegroundColor = ConsoleColor.DarkRed;
+            Console.WriteLine(@"
+
+                         
+              o,            
+             /                                  
+  _O/                        
+  /|                         
+  /\ .............................
+
+");
+            Thread.Sleep(200);
+            Console.Clear();
+            CityLogo();
+
+            Console.ForegroundColor = ConsoleColor.DarkRed;
+            Console.WriteLine(@"
+
+                        = o,
+                          
+                                                    
+   O___                        
+  /|                         
+  /\ .............................
+");
+            Thread.Sleep(200);
+            Console.Clear();
+            CityLogo();
+
+            Console.ForegroundColor = ConsoleColor.DarkRed;
+            Console.WriteLine(@"
+                        
+                        
+                         \
+                          o, 
+                                                    
+   O                          
+  /|\                          
+  /\ .............................
+");
+            Thread.Sleep(200);
+            Console.Clear();
+            CityLogo();
+
+            Console.ForegroundColor = ConsoleColor.DarkRed;
+            Console.WriteLine(@"
+                        
+                        
+                        
+                           \ 
+                            o,                       
+   O                          
+  /|\                          
+  /\ .............................
+");
+            Thread.Sleep(200);
+            Console.Clear();
+            CityLogo();
+
+            Console.ForegroundColor = ConsoleColor.DarkRed;
+            Console.WriteLine(@"
+                        
+                        
+                        
+                        
+                             \                        
+   O                          o,
+  /|\                          
+  /\ .............................
+");
+            Thread.Sleep(200);
+            Console.Clear();
+            CityLogo();
+
+            Console.ForegroundColor = ConsoleColor.DarkRed;
+            Console.WriteLine(@"                     
+                        
+                        
+                        
+                                                     
+   O                          \
+  /|\                          o,
+  /\ .............................
+ 
+");
+            Thread.Sleep(200);
+            Console.Clear();
+            CityLogo();
+
+            Console.ForegroundColor = ConsoleColor.DarkRed;
+            Console.WriteLine(@"
+                             \         .  ./
+                           \      .: ;'.:..    /
+                               (M^^.^~~:.' ).
+                         -   (/  .    . . \ \)  -
+                          ((| :. ~ ^  :. .|))
+   O                     -   (\- |  \ /  |  /)  -
+  /|\                         -\  \     /  /-
+  /\ ...............................\  \   /  /
+");
+            Thread.Sleep(200);
+            Console.Clear();
+            CityLogo();
+
+            Console.ForegroundColor = ConsoleColor.DarkRed;
+            Console.WriteLine(@"
+                             \         .  ./
+                           \      .: ;'.:..    /
+                               (M^^.^~~:.' ).
+                         -   (/  .    . . \ \)  -
+  .                        ((| :. ~ ^  :. .|))
+   \O__.                   -   (\- |  \ /  |  /)  -
+   /                         -\  \     /  /-
+  /\ ...............................\  \   /  /
+");
+            Thread.Sleep(1000);
+            Console.Clear();
         }
 
     }
