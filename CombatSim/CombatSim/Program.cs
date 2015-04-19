@@ -39,20 +39,30 @@ namespace CombatSim
         static int CitiesLost = 0;
         //Confirm attack type
         static string UserConfirmation = null;
+        //stats
         static int katanaAtk = 1;
         static int katanaDmg = 0;
         static int pistolAtk = 1;
         static int pistolDmg = 0;
         static int APDAtk = 1;
         static int APDDmg = 0;
+        //tracks enemy kills for cash rewards
         static int enemiesKill = 0;
+        //counts how many times user buys ammo during game
         static int buyAmmo = 0;
+        //tracks total cash earned
         static int CashEarned = 0;
+        //tracks whether grenade debuff is active or not
         static int grenade = 0;
+        //tracks # of grenades purchased
         static int GrenadeUsage = 0;
+        //base auto accuracy
         static int APDAccuracy = 30;
+        //base katana accuracy
         static int KatAccuracy = 65;
+        //implants buff on or off
         static int Implants = 0;
+        //total implants purcased
         static int ImplantsTotal = 0;
         static void Main(string[] args)
         {
@@ -63,13 +73,15 @@ namespace CombatSim
             //scroll text from top
             TitleScrollFromTop();
             Console.Clear();
+            //basic hud template without data
             CityLogo();
             TitleScroll();
+            //user prompt
             Console.WriteLine("\n                               Press Enter To Play: ");
             Console.ReadKey();
             //StoryLine();
 
-            //set all game values initially
+            //set all initial gam values
             BulletsLeft = 100;
             EnemiesLeft = rand.Next(150, 251);
             MoneyLeft = 50;
@@ -103,37 +115,19 @@ namespace CombatSim
 ");
                     //try to parse user input to int
                     int.TryParse(Console.ReadLine(), out UserSelection);
-                    //if user selection is NOT 0 make combat selection
+                    //checks case of user input
                     CombatSelector(UserSelection);
-                    int newMoney = 0;
-
-                    //adds money to stash for each 25 enemies killed
-                    if (enemiesKill >= 25)
-                    {
-                        HeadsUpDisplay();
-                        Console.ForegroundColor = ConsoleColor.DarkRed;
-                        newMoney = enemiesKill / 25;
-                        newMoney = newMoney * 5;
-                        MoneyLeft = MoneyLeft + newMoney;
-                        CashEarned = CashEarned + newMoney;
-                        Console.WriteLine("\nYou killed more than 25 enemies.\n\n${0} added to your stash.", newMoney);
-                        //while subtracting 25 is not negative
-                        while (enemiesKill - 25 > 0)
-                        {
-                            //subtract 25
-                            //this old kills aren't lost
-                            enemiesKill = enemiesKill - 25;
-                        }
-
-                        Console.WriteLine("\nPress any key to continue: ");
-                        Console.ReadKey();
-                        Console.ForegroundColor = ConsoleColor.White;
-                    }
+                    //adds money kill awards
+                    NewMoneyAdder();
+                    //checks if implants are active
                     if (Implants > 0)
                     {
+                        //then reduce by 1
+                        //implants are active for 5 rounds
                         Implants--;
 
                     }
+                    //implants deactivate, reset default values
                     else if (Implants <= 0)
                     {
                         KatAccuracy = 65;
@@ -144,6 +138,8 @@ namespace CombatSim
                 //if there are NO ENEMEIES LEFT or OUT OF LIFE
                 while (EnemiesLeft <= 0 || BulletsLeft <= 0)
                 {
+                    //bullets/enemies = 0
+                    //keeps numbers from display negative
                     if (BulletsLeft <= 0)
                     {
                         BulletsLeft = 0;
@@ -152,8 +148,10 @@ namespace CombatSim
                     {
                         EnemiesLeft = 0;
                     }
+                    //if user loses 3 cities game over
                     if (CitiesLost == 3)
                     {
+                        //give a value so that loop is broken
                         BulletsLeft = 1;
                         EnemiesLeft = 1;
                         ContinuePlaying = false;
@@ -1095,18 +1093,25 @@ Chance to Hit: 50%
                             case "Y":
                                 if (MoneyLeft >= 50)
                                 {
+                                    //implants total purchased this game
                                     ImplantsTotal++;
+                                    //subtract cost
                                     MoneyLeft = MoneyLeft - 50;
+                                    //activate implants for 5 rounds
                                     Implants = 5;
+                                    //change accuracy for both items
                                     APDAccuracy = 1;
                                     KatAccuracy = 20;
                                     HeadsUpDisplay();
                                     Console.WriteLine("\nYou now have perfect accuracy with the APD, \n     and improved accuracy with the KATANA for 5 rounds.");
                                 }
+                                //if user doesn't have enough money
                                 else if (MoneyLeft < 50)
                                 {
+                                    //don't activate implant effect
                                     HeadsUpDisplay();
-                                    Console.WriteLine("Don't try to cheat me. I can see you don't have enough money for those implants!");
+                                    Console.ForegroundColor = ConsoleColor.DarkRed;
+                                    Console.WriteLine("\nDon't try to cheat me! \n    I can see you don't have enough money for those implants!");
                                 }
                                 //keep combat messages on screen
                                 Console.WriteLine("\nPress Enter: ");
@@ -1138,6 +1143,7 @@ Chance to Hit: 50%
                     HeadsUpDisplay();
 
                     Console.ForegroundColor = ConsoleColor.DarkRed;
+                    //suggests that the user tries putting correct input 
                     Console.WriteLine("\nYour gun jammed! \n\nYou can't be losing your precious ammo like that!");
                     Console.WriteLine("\nPress Enter: ");
                     Console.ReadKey();
@@ -1151,7 +1157,7 @@ Chance to Hit: 50%
         /// </summary>
         public static void HowToPlay()
         {
-            //list of instructions
+            //list of instructions to play game
             List<string> instructions = new List<string>()
             {
                 "As Blade Runner, \n    you have 2 tools at your disposal for eliminating Replicant Husks.",
@@ -1163,7 +1169,7 @@ Chance to Hit: 50%
             {
 
                 Console.WriteLine("How to play: \n\n");
-                //scroll text
+                //scroll text from list
                 foreach (object c in instructions[i])
                 {
                     Console.Write(c);
@@ -1173,11 +1179,11 @@ Chance to Hit: 50%
                 Console.WriteLine("\n\n           Press any key to continue: ");
                 Console.ReadKey();
                 Console.Clear();
-                Console.ForegroundColor = ConsoleColor.DarkGray;
+                //show static automatic gun
                 AutoMaticGun();
                 Console.ForegroundColor = ConsoleColor.White;
             }
-            //second set of instructions
+            //second set of instructions for pistol
             List<string> instructions2 = new List<string>()
             {
                       "Next is your semi-automatic side-arm.",
@@ -1200,6 +1206,7 @@ Chance to Hit: 50%
                 Console.ReadKey();
                 Console.Clear();
                 Console.ForegroundColor = ConsoleColor.DarkRed;
+                //show static pistol
                 SemiAutoGun();
                 Console.ForegroundColor = ConsoleColor.White;
             }
@@ -1231,7 +1238,7 @@ Chance to Hit: 50%
             Console.ForegroundColor = ConsoleColor.White;
         }
         /// <summary>
-        /// Basic Display
+        /// Basic Display Logo
         /// </summary>
         public static void TitleScroll()
         {
@@ -1256,7 +1263,7 @@ Chance to Hit: 50%
             //only scroll caption once
             if (CaptionCount == 0)
             {
-                //scroll text
+                //scroll text from caption
                 foreach (object c in caption)
                 {
 
@@ -1283,6 +1290,8 @@ Chance to Hit: 50%
             CityLogo();
             TitleScroll();
             int loopCounter = 0;
+
+            //plot 
             List<string> plot = new List<string>()
             {
             "The year is 2199.",
@@ -1298,7 +1307,7 @@ Chance to Hit: 50%
             for (int i = 0; i < plot.Count; i++)
             {
 
-                //scroll text
+                //scroll list text
                 foreach (object c in plot[i])
                 {
                     Console.Write(c);
@@ -1307,6 +1316,7 @@ Chance to Hit: 50%
                 Console.WriteLine("\n");
                 Thread.Sleep(500);
                 loopCounter++;
+                //prints out 5 items from list, then asks for user to continue
                 if (loopCounter == 5)
                 {
                     loopCounter = 0;
@@ -1338,13 +1348,15 @@ Chance to Hit: 50%
             int hudReset = 0;
             CityLogo();
             TitleScroll();
-            //cities count
+            //cities count and implants status
+            //implants on
             if (Implants > 0)
             {
 
                 Console.WriteLine("Implants: (⌐■_■) on                        Cities Cleared: {0}", CitiesCleared);
                 Console.WriteLine("                                              Cities Lost: {0}", CitiesLost);
             }
+            //implants off
             else if (Implants <= 0)
             {
                 Console.WriteLine("Implants: ( o_o) off                        Cities Cleared: {0}", CitiesCleared);
@@ -1364,6 +1376,7 @@ Chance to Hit: 50%
                 }
             }
             //reset  hud count for each item
+            //build enemies hud
             hudReset = 0;
             Console.WriteLine("Bullets Left: {1}\n{0}", bulletHud, BulletsLeft);
             for (int i = 0; i < EnemiesLeft; i += 2)
@@ -1376,6 +1389,7 @@ Chance to Hit: 50%
                     hudReset = 0;
                 }
             }
+            //build money hud
             hudReset = 0;
             Console.WriteLine("Enemies Left: {1}\n{0}", enemiesHud, EnemiesLeft);
             for (int i = 0; i < MoneyLeft; i += 2)
@@ -1492,6 +1506,7 @@ _//\::/\:\///_/ /_//:\::::\:\/______________/  \   /  \/  \/+/\  /\  /   /   /
           (  )
            \/";
             int katanaFly = 0;
+            //katana flies down the screen
             while (katanaFly < 15)
             {
                 fullKatana = "\n" + fullKatana;
@@ -1661,7 +1676,7 @@ SSS            WXXXXXXW
 
         }
         /// <summary>
-        /// for automatic gun fire
+        /// still image of auto gun
         /// </summary>
         public static void AutoMaticGun()
         {
@@ -1835,7 +1850,7 @@ SSS            WXXXXXXW
 
         }
         /// <summary>
-        /// static image
+        /// static image of pistol
         /// </summary>
         public static void SemiAutoGun()
         {
@@ -2002,7 +2017,8 @@ SSS            WXXXXXXW
 
         }
         /// <summary>
-        /// enemy attack text
+        /// enemy attack function
+        /// determines whether the enemy attacks, reinforces etc
         /// </summary>
         public static void EnemyAttack()
         {
@@ -2036,12 +2052,13 @@ SSS            WXXXXXXW
             ChanceToHit = 0;
             //enemies have a 30% chance to reinforce their numbers
             reinforcements = rand.Next(1, 101);
+            //if grenade debuff is active, only 5% chance of reiforcments for 3 rounds
             if (grenade > 0)
             {
                 reinforcementChance = 95;
                 grenade--;
             }
-
+            //enemies reinforce or don't
             if (reinforcements > reinforcementChance)
             {
                 HeadsUpDisplay();
@@ -2089,6 +2106,8 @@ SSS            WXXXXXXW
             int totalStat = totalDmg / totalAtk;
             CityLogo();
             TitleScroll();
+
+            //final scoreboard tally
             Console.WriteLine(@"
       Cities Cleared: {0}
          Cities Lost: {1}", CitiesCleared, CitiesLost);
@@ -2245,6 +2264,37 @@ SSS            WXXXXXXW
 ");
             Thread.Sleep(1000);
             Console.Clear();
+        }
+        /// <summary>
+        /// this function rewards players for getting accumulated kills
+        /// </summary>
+        public static void NewMoneyAdder()
+        {
+
+            int newMoney = 0;
+
+            //adds money to stash for each 25 enemies killed
+            if (enemiesKill >= 25)
+            {
+                HeadsUpDisplay();
+                Console.ForegroundColor = ConsoleColor.DarkRed;
+                newMoney = enemiesKill / 25;
+                newMoney = newMoney * 5;
+                MoneyLeft = MoneyLeft + newMoney;
+                CashEarned = CashEarned + newMoney;
+                Console.WriteLine("\nYou killed more than 25 enemies.\n\n${0} added to your stash.", newMoney);
+                //while subtracting 25 is not negative
+                while (enemiesKill - 25 > 0)
+                {
+                    //subtract 25
+                    //this old kills aren't lost
+                    enemiesKill = enemiesKill - 25;
+                }
+
+                Console.WriteLine("\nPress any key to continue: ");
+                Console.ReadKey();
+                Console.ForegroundColor = ConsoleColor.White;
+            }
         }
 
     }
