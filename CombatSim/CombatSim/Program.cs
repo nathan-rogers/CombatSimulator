@@ -70,6 +70,7 @@ namespace CombatSim
             Random rand = new Random();
             //set window size
             Console.WindowHeight = 69;
+
             //scroll text from top
             TitleScrollFromTop();
             Console.Clear();
@@ -95,23 +96,31 @@ namespace CombatSim
                     UserSelection = 0;
                     HeadsUpDisplay();
                     //prompt
-                    Console.WriteLine("Replicants are infesting the city!");
                     Console.WriteLine(@"
-                       
-1.Light Automatic Dispersion Pistol                  <((((((\\\
-                                                     /      . }\
-2..45 Caliber Anti-Matter Pistol                     ;--..--._|}
-                                  (\                 '--/\--'  )
-3.Resupply Drop:                   \\                | '-'  :'|
-                                    \\               . -==- .-|
-4.Katana                             \\               \.__.'   \--._
-                                     [\\          __.--|       //  _/'--.
-5.Grenade                            \ \\       .'-._ ('-----'/ __/      \
-                                      \ \\     /   __>|      | '--.       |
-6.Implants                             \ \\   |   \   |     /    /       /
-                                        \ '\ /     \  |     |  _/       /
-                                         \  \       \ |     | /        /
-                                          \  \      \        /
+Replicants are infesting the city!   .......  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+1. Automatic Dispersion Pistol (ADP) ....... @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+                                     ....... @@@@@@@@@@ oo o@@@@o @@@@@@@@@oooo
+2. 45 Caliber Anti-Matter Pistol     ....... @@@ @a0000000000000000a  a00000a00
+                                     ....... @@@@ 0000000000000000000 000000000
+3. Resupply Drop                     ........ @@ 0000 0000000000000000000000000
+                                     ........ @@@ 0000 000000000000000000000000
+4. Katana                            ........ @@@ 000 0000000000000000000000000
+                                     ........ @@@ 000 0000000000000000000000000
+5. EMP Grenade                       ......... @@@ 00 00000000000 00000 0000000
+                                     ...... 00;.                 aaaaa a       
+6. Accuracy Implants                 .......0000 00000ta        /00000 000\  
+                                     .......`000 000000000000mn000000 0000mn000
+  ,-.__________________,======= ,    ....... 000 00000000000000000000 000000000
+[ (   _  _  _ )_______)  \\\\\ ((t   ........ 00 00000000000000000000 000000000
+  /================.-.______,--'_\   ......... 0 0000000000000000 00000 0000000
+  \_,__,_________\     [ ]    /      ........... 0a  00000000000 0000000 000000
+            \ (   )) )   o   (       ............ 000a00000000000mm   mm0000000
+             \ \____/    \    \      ............ 0000 000000000000000000000000
+              ' ===''\    \    \     ............  000000000000            0000
+                      \    \    \    ......        a 000000000m0000000000000000
+                       )____\   |    .....      ,' 00a 000000000          00000
+                       ) __, __,'    ...      ,'   0000a 0000000000000000000000
+                        '--''        .      ,'     `00000a 00000000000000000000
 ");
                     //try to parse user input to int
                     int.TryParse(Console.ReadLine(), out UserSelection);
@@ -688,10 +697,9 @@ $$\     $$\  $$$$$$\  $$\   $$\       $$\      $$\ $$$$$$\ $$\   $$\
                     HeadsUpDisplay();
                     Console.WriteLine(@"
       THE ADP:
-         Cost: 5 Bullets 
-");
-                    Console.WriteLine("\nChance to Hit: {0}\n   Max Damage: 40", 100 - APDAccuracy);
-                    Console.WriteLine("\nDo you want to continue using the ADP? Y/N");
+         Cost: 5 Bullets");
+                    Console.Write("Chance to Hit: {0}\n   Max Damage: 40", 100 - APDAccuracy);
+                    Console.WriteLine("\n\nDo you want to continue using the ADP? Y/N");
                     //Are you sure?
                     UserConfirmation = null;
                     while (UserConfirmation == null)
@@ -1017,7 +1025,7 @@ Chance to Hit: 55%
                     {
                         Console.WriteLine("\nRounds Left of Bonus Effect: {0}", grenade);
                     }
-                    Console.WriteLine("\nDo you want to continue using the Grenade? Y/N");
+                    Console.WriteLine("Do you want to continue using the Grenade? Y/N");
                     UserConfirmation = null;
                     while (UserConfirmation == null)
                     {
@@ -1029,6 +1037,7 @@ Chance to Hit: 55%
                             //Yes
                             case "Y":
                                 //Grenade animation
+                                GrenadeBoom();
                                 if (MoneyLeft <= 0)
                                 {
                                     HeadsUpDisplay();
@@ -1096,7 +1105,7 @@ Chance to Hit: 55%
                 case 6:
                     HeadsUpDisplay();
                     Console.WriteLine(@"
-      IMPLANTS:
+     IMPLANTS:
          Cost: $50
         Bonus: 100% Accuracy with ADP and KATANA for 5 Rounds!
 ");
@@ -1105,7 +1114,7 @@ Chance to Hit: 55%
                     {
                         Console.WriteLine("\nRounds Left of Bonus Effect: {0}", Implants);
                     }
-                    Console.WriteLine("\nDo you wish to purchase IMPLANTS? Y/N");
+                    Console.WriteLine("Do you wish to purchase IMPLANTS? Y/N");
                     UserConfirmation = null;
                     while (UserConfirmation == null)
                     {
