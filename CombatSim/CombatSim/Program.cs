@@ -47,7 +47,10 @@ namespace CombatSim
         static int APDAtk = 0;
         static int APDDmg = 0;
         static int TacticalNuke = 0;
+        //how many times to give payment
         static int MoneyIncrement = 0;
+        //sets reinforcement max, scales with levels
+        static int MaxReinforcement = 20;
 
         //tracks enemy kills for cash rewards
         static int enemiesKill = 0;
@@ -70,10 +73,11 @@ namespace CombatSim
         //increases difficutly
         static int EnemySpawnChance = 150;
         //increases enemy damage per round
-        static int EnemyScalingDamage = 7;
+        static int EnemyScalingDamage = 10;
         //increases money reward per ever 50 extra enemies every 2 rounds
         static int MoneyReward = 0;
-        static int LevelCounter = 0;
+        //counts current level
+        static int LevelCounter = 1;
         static void Main(string[] args)
         {
 
@@ -190,6 +194,14 @@ namespace CombatSim
                             CitiesLost++;
                             //reset reward counter
                             enemiesKill = 0;
+                            //reset difficulty 
+                            EnemySpawnChance = 150;
+
+                            EnemyScalingDamage = 15;
+
+                            EnemiesLeft = EnemySpawnChance;
+
+                            MaxReinforcement = 20;
 
 
                         }
@@ -200,9 +212,11 @@ namespace CombatSim
 
                             EnemySpawnChance = EnemySpawnChance + 25;
 
-                            EnemyScalingDamage = EnemyScalingDamage + 2;
+                            EnemyScalingDamage = EnemyScalingDamage + 5;
 
                             EnemiesLeft = EnemySpawnChance;
+
+                            MaxReinforcement = MaxReinforcement + 5;
                         }
                         //Grants an extra 5 bucks per 50 extra enemies
                         if (CitiesCleared > 0 && CitiesCleared % 2 == 0)
@@ -215,7 +229,7 @@ namespace CombatSim
                                 MoneyReward = MoneyReward + 5;
                             }
                         }
-                        LevelCounter = CitiesCleared + CitiesLost;
+                        LevelCounter = CitiesCleared + CitiesLost + 1;
                     }
                 }
             }
@@ -982,7 +996,7 @@ $$\     $$\  $$$$$$\  $$\   $$\       $$\      $$\ $$$$$$\ $$\   $$\
                                 {
                                     katanaAtk++;
                                     //how much damage
-                                    SemiAuto = rand.Next(30, 100);
+                                    SemiAuto = rand.Next(30, 101);
                                     //stats
                                     katanaDmg = katanaDmg + SemiAuto;
                                     //subtract damage from enemy total
@@ -1051,7 +1065,7 @@ Chance to Hit: 55%
                             //Yes
                             case "Y":
                                 //check to see if user has money
-                                if (MoneyLeft <= 0)
+                                if (MoneyLeft <= 10)
                                 {
                                     //User has NO money
                                     HeadsUpDisplay();
@@ -1060,7 +1074,7 @@ Chance to Hit: 55%
                                     Console.WriteLine("\nYou trying to cheat me, boy?\n  You aint got the funds for these munitions.");
                                 }
                                 //user HAS money
-                                else if (MoneyLeft > 0)
+                                else if (MoneyLeft > 10)
                                 {
 
                                     GrenadeBoom();
@@ -1198,6 +1212,7 @@ Chance to Hit: 55%
 TACTICAL NUKE:
          Cost: $100
        Effect: Reduces Enemy Count to 0
+       Debuff: Reduce bonus cash to default
 ");
                     Console.WriteLine("Do you wish to purchase  TACTICAL NUKE? Y/N");
                     UserConfirmation = null;
@@ -1212,17 +1227,22 @@ TACTICAL NUKE:
                             case "Y":
                                 if (MoneyLeft >= 100)
                                 {
+
+                                    MoneyReward = 0;
                                     //implants total purchased this game
                                     TacticalNuke++;
                                     //subtract cost
                                     MoneyLeft = MoneyLeft - 100;
+                                    enemiesKill = EnemiesLeft + enemiesKill;
                                     //activate implants for 5 rounds
                                     //since  implants decrements after each round
                                     //user has 5 rounds of COMBAT to use implants
+                                    Console.WriteLine("You killed {0} Replicants!!!", EnemiesLeft);
                                     EnemiesLeft = 0;
                                     //change accuracy for both items
                                     TacticalNukeAnimation();
                                     TacticalNuke++;
+
                                 }
                                     //user doesn't have enough money
                                 else if (MoneyLeft < 100)
@@ -1360,7 +1380,7 @@ TACTICAL NUKE:
         {
 
             Console.ForegroundColor = ConsoleColor.DarkCyan;
-            string caption = "Humans Vs. Machines";
+            string caption = "Humans Vs. Machines\n";
             string title = @"
  ██████╗██╗   ██╗██████╗ ███████╗██████╗ ███╗   ██╗███████╗████████╗██╗██╗  ██╗
 ██╔════╝╚██╗ ██╔╝██╔══██╗██╔════╝██╔══██╗████╗  ██║██╔════╝╚══██╔══╝██║╚██╗██╔╝
@@ -1466,29 +1486,29 @@ TACTICAL NUKE:
             TitleScroll();
             //cities count and implants status
             //displays current level
-            Console.WriteLine("Cash Bonus: ${1}/20 kills                            Level: {0}", LevelCounter, 5 + MoneyReward);
+            Console.WriteLine("Cash Bonus: ${1}/20 kills    Enemy Max Damage: {2}    Level: {0}\n", LevelCounter, 5 + MoneyReward, EnemyScalingDamage);
             //implants on
             if (Implants > 0 && grenade > 0)
             {
-                Console.WriteLine("  Implants: (⌐■_■) on                    Cities Cleared: {0}", CitiesCleared);
-                Console.WriteLine("EMP Effect:  \\-^-/ on                       Cities Lost: {0}", CitiesLost);
+                Console.WriteLine("  Implants: (⌐■_■) on                                         Cities Cleared: {0}", CitiesCleared);
+                Console.WriteLine("EMP Effect:  \\-^-/ on                                           Cities Lost: {0}\n", CitiesLost);
             }
             else if (Implants > 0)
             {
                 Console.WriteLine("  Implants: (⌐■_■) on                    Cities Cleared: {0}", CitiesCleared);
-                Console.WriteLine("EMP Effect:  /---\\ off                      Cities Lost: {0}", CitiesLost);
+                Console.WriteLine("EMP Effect:  /---\\ off                      Cities Lost: {0}\n", CitiesLost);
             }
             else if (grenade > 0)
             {
                 Console.WriteLine("  Implants: ( o_o) off                    Cities Cleared: {0}", CitiesCleared);
-                Console.WriteLine("EMP Effect:  \\-^-/ on                        Cities Lost: {0}", CitiesLost);
+                Console.WriteLine("EMP Effect:  \\-^-/ on                        Cities Lost: {0}\n", CitiesLost);
 
             }
             //implants off
             else if (Implants <= 0 && grenade <= 0)
             {
                 Console.WriteLine("  Implants: ( o_o) off                    Cities Cleared: {0}", CitiesCleared);
-                Console.WriteLine("EMP Effect:  /---\\ off                       Cities Lost: {0}", CitiesLost);
+                Console.WriteLine("EMP Effect:  /---\\ off                       Cities Lost: {0}\n", CitiesLost);
             }
             //scroll through and ad """"" to bullets hud
             for (int i = 0; i < BulletsLeft; i += 2)
@@ -2192,7 +2212,7 @@ SSS            WXXXXXXW
             {
                 HeadsUpDisplay();
                 //reinforce with 15-50 enemies per wave
-                ChanceToHit = rand.Next(15, 40);
+                ChanceToHit = rand.Next(15, MaxReinforcement);
 
                 Console.ForegroundColor = ConsoleColor.DarkRed;
                 Console.WriteLine("A WAVE OF {0} REPLICANTS HAS STORMED THE CITY!!!", ChanceToHit);
