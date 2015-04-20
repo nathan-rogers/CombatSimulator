@@ -94,7 +94,7 @@ namespace CombatSim
             //user prompt
             Console.WriteLine("\n                               Press Enter To Play: ");
             Console.ReadKey();
-            StoryLine();
+            //StoryLine();
 
             //set all initial gam values
             BulletsLeft = 100;
@@ -1233,7 +1233,15 @@ TACTICAL NUKE:
                                     TacticalNuke++;
                                     //subtract cost
                                     MoneyLeft = MoneyLeft - 100;
-                                    enemiesKill = EnemiesLeft + enemiesKill;
+                                    //defeats infinite nuke at end of game until very very high levels
+                                    if (enemiesKill <= 100)
+                                    {
+                                        enemiesKill = EnemiesLeft + (enemiesKill / 2);
+                                    }
+                                    if(enemiesKill>= 100)
+                                    {
+                                        enemiesKill = EnemiesLeft + (enemiesKill / 4);
+                                    }
                                     //activate implants for 5 rounds
                                     //since  implants decrements after each round
                                     //user has 5 rounds of COMBAT to use implants
@@ -2176,7 +2184,7 @@ SSS            WXXXXXXW
             int reinforcementChance = 70;
             ChanceToHit = rand.Next(1, 101);
             //80% chance to hit
-            if (ChanceToHit > 20)
+            if (ChanceToHit > 12)
             {
                 //if there are still enemies left, attack
                 if (EnemiesLeft > 0)
@@ -2254,11 +2262,11 @@ SSS            WXXXXXXW
             if (pistolAtk > 0)
             {
 
-                pistolStat = pistolDmg / (pistolAtk - 1);
+                pistolStat = pistolDmg / pistolAtk;
             }
             if (APDAtk > 0)
             {
-                APDStat = APDDmg / (APDAtk - 1);
+                APDStat = APDDmg / APDAtk;
             }
             totalDmg = katanaDmg + pistolDmg + APDDmg;
             totalAtk = (katanaAtk + pistolAtk + APDAtk);
