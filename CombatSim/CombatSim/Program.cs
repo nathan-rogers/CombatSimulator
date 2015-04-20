@@ -46,6 +46,8 @@ namespace CombatSim
         static int pistolDmg = 0;
         static int APDAtk = 1;
         static int APDDmg = 0;
+        static int TacticalNuke = 0;
+
         //tracks enemy kills for cash rewards
         static int enemiesKill = 0;
         //counts how many times user buys ammo during game
@@ -66,6 +68,11 @@ namespace CombatSim
         static int ImplantsTotal = 0;
         //increases difficutly
         static int EnemySpawnChance = 150;
+        //increases enemy damage per round
+        static int EnemyScalingDamage = 7;
+        //increases money reward per ever 50 extra enemies every 2 rounds
+        static int MoneyReward = 0;
+        static int LevelCounter = 0;
         static void Main(string[] args)
         {
 
@@ -98,32 +105,8 @@ namespace CombatSim
                     UserSelection = 0;
                     HeadsUpDisplay();
                     //prompt
-                    Console.WriteLine(@"
-Replicants are infesting the city!   .......  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-1. Automatic Dispersion Pistol (ADP) ....... @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-                                     ....... @@@@@@@@@@ oo o@@@@o @@@@@@@@@oooo
-2. 45 Caliber Anti-Matter Pistol     ....... @@@ @a0000000000000000a  a00000a00
-                                     ....... @@@@ 0000000000000000000 000000000
-3. Resupply Drop                     ........ @@ 0000 0000000000000000000000000
-                                     ........ @@@ 0000 000000000000000000000000
-4. Katana                            ........ @@@ 000 0000000000000000000000000
-                                     ........ @@@ 000 0000000000000000000000000
-5. EMP Grenade                       ......... @@@ 00 00000000000 00000 0000000
-                                     ...... 00;.                 aaaaa a       
-6. Accuracy Implants                 .......0000 00000ta        /00000 000\  
-                                     .......`000 000000000000mn000000 0000mn000
-  ,-.__________________,======= ,    ....... 000 00000000000000000000 000000000
-[ (   _  _  _ )_______)  \\\\\ ((t   ........ 00 00000000000000000000 000000000
-  /================.-.______,--'_\   ......... 0 0000000000000000 00000 0000000
-  \_,__,_________\     [ ]    /      ........... 0a  00000000000 0000000 000000
-            \ (   )) )   o   (       ............ 000a00000000000mm   mm0000000
-             \ \____/    \    \      ............ 0000 000000000000000000000000
-              ' ===''\    \    \     ............  000000000000            0000
-                      \    \    \    ......        a 000000000m0000000000000000
-                       )____\   |    .....      ,' 00a 000000000          00000
-                       ) __, __,'    ...      ,'   0000a 0000000000000000000000
-                        '--''        .      ,'     `00000a 00000000000000000000
-");
+                    GameScreen();
+                    
                     //try to parse user input to int
                     int.TryParse(Console.ReadLine(), out UserSelection);
                     //checks case of user input
@@ -186,15 +169,7 @@ Replicants are infesting the city!   .......  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
                             KeepPlaying();
                             //count number of cities cleared
                             CitiesCleared++;
-                            if (CitiesCleared > 0)
-                            {
-                                for (int i = 0; i < CitiesCleared; i++)
-                                {
-                                    EnemySpawnChance = EnemySpawnChance + 20;
 
-                                    EnemiesLeft = EnemySpawnChance;
-                                }
-                            }
 
                         }
                         //when the user runs ouf of bullets/life
@@ -214,6 +189,33 @@ Replicants are infesting the city!   .......  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
                             CitiesLost++;
 
                         }
+
+                        //increases enemy difficulty Per Level
+                        if (CitiesCleared > 0)
+                        {
+
+                            EnemySpawnChance = EnemySpawnChance + 25;
+
+                            EnemyScalingDamage = EnemyScalingDamage + 2;
+
+                            EnemiesLeft = EnemySpawnChance;
+                        }
+                        //Grants an extra 5 bucks per 50 extra enemies
+                        if (CitiesCleared > 0 && CitiesCleared % 2 == 0)
+                        {
+                            //earn an extra 5 bucks per 50 extra enemies
+                            for (int i = 0; i < CitiesCleared; i += 2)
+                            {
+                                
+                              MoneyReward = MoneyReward + 5;
+                            }
+                            //if there are a lot of enemies, more bonus
+                            if (EnemiesLeft > 250)
+                            {
+                                MoneyReward = MoneyReward + 5;
+                            }
+                        }
+                        LevelCounter = CitiesCleared + CitiesLost;
                     }
                 }
             }
@@ -256,7 +258,6 @@ Replicants are infesting the city!   .......  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
                         //reset counters for new game
 
 
-                        MoneyLeft = 50;
                         //do not reset money, or bullets. 
                         //money is earned in the game
                         break;
@@ -1190,6 +1191,61 @@ Chance to Hit: 55%
 
 
                     break;
+                case 7:
+                    if (MoneyReward > 100)
+                        HeadsUpDisplay();
+                    Console.WriteLine(@"
+TACTICAL NUKE:
+         Cost: $100
+       Effect: Reduces Enemy Count to 0
+");
+                    Console.WriteLine("Do you wish to purchase  TACTICAL NUKE? Y/N");
+                    UserConfirmation = null;
+                    while (UserConfirmation == null)
+                    {
+
+                        UserConfirmation = Console.ReadLine().ToUpper();
+                        //are you sure?
+                        switch (UserConfirmation)
+                        {
+                            //Yes
+                            case "Y":
+                                if (MoneyLeft >= 100)
+                                {
+                                    //implants total purchased this game
+                                    TacticalNuke++;
+                                    //subtract cost
+                                    MoneyLeft = MoneyLeft - 100;
+                                    //activate implants for 5 rounds
+                                    //since  implants decrements after each round
+                                    //user has 5 rounds of COMBAT to use implants
+                                    EnemiesLeft = 0;
+                                    //change accuracy for both items
+                                    TacticalNukeAnimation();
+
+                                }
+                                //if user doesn't have enough money
+                                Console.WriteLine("You can't use this option yet!!!");
+                                //keep combat messages on screen
+                                Console.WriteLine("\nPress Enter: ");
+                                Console.ReadKey();
+                                EnemyAttack();
+
+                                Console.ForegroundColor = ConsoleColor.White;
+                                break;
+                            //do not continue with combat action
+                            //make new selection
+                            case "N":
+                                break;
+                            //invalid input
+                            default:
+                                Console.WriteLine("\nPlease Enter Y or N: ");
+                                UserConfirmation = null;
+                                break;
+                        }
+                    }
+
+                    break;
 
                 //user did not select 1, 2, 3, 4 or 5
                 default:
@@ -1404,6 +1460,8 @@ Chance to Hit: 55%
             CityLogo();
             TitleScroll();
             //cities count and implants status
+            //displays current level
+            Console.WriteLine("                                                   Level: {0}", LevelCounter);
             //implants on
             if (Implants > 0 && grenade > 0)
             {
@@ -2099,7 +2157,7 @@ SSS            WXXXXXXW
                 if (EnemiesLeft > 0)
                 {
                     //enemy damage
-                    EnemyDamage = rand.Next(5, 16);
+                    EnemyDamage = rand.Next(5, EnemyScalingDamage);
                     BulletsLeft = BulletsLeft - EnemyDamage;
                     if (BulletsLeft < 0)
                     {
@@ -2125,7 +2183,7 @@ SSS            WXXXXXXW
                 reinforcementChance = 95;
                 grenade--;
             }
-            if (reinforcements > reinforcementChance)
+            if (reinforcements > reinforcementChance && EnemiesLeft > 0)
             {
                 HeadsUpDisplay();
                 //reinforce with 15-50 enemies per wave
@@ -2348,7 +2406,7 @@ SSS            WXXXXXXW
                 //for every 20 kills get 5 bucks
                 newMoney = enemiesKill / 20;
                 newMoney = newMoney * 5;
-                MoneyLeft = MoneyLeft + newMoney;
+                MoneyLeft = MoneyLeft + newMoney + MoneyReward;
                 CashEarned = CashEarned + newMoney;
                 Console.WriteLine("\nYou killed {1} enemies.\n\n${0} added to your stash.", newMoney, enemiesKill);
                 //while subtracting 25 is not negative
@@ -2364,6 +2422,316 @@ SSS            WXXXXXXW
                 Console.ForegroundColor = ConsoleColor.White;
             }
         }
+        public static void TacticalNukeAnimation()
+        {
+            Console.ForegroundColor = ConsoleColor.DarkRed;
+            Console.Clear();
+            Console.WriteLine(@"
+                                                 /
+                                                /      /
+                                               /  /   /  /         /
+                                              /      /       /    /
+                                            ,---------------.   ,-,
+                                           /                 `-'  |
+                                          [                   |   |
+                                           \                 ,-.  |
+                                            `---------------'   `-`");
+            Thread.Sleep(200);
+            Console.Clear();
+
+
+            Console.WriteLine(@"
+
+
+                                            /
+                                           /      /
+                                          /  /   /  /         /
+                                         /      /       /    /
+                                       ,---------------.   ,-,
+                                      /                 `-'  |
+                                     [                   |   |
+                                      \                 ,-.  |
+                                       `---------------'   `-`");
+            Thread.Sleep(200);
+            Console.Clear();
+
+
+            Console.WriteLine(@"
+
+
+
+
+                                    /
+                                   /      /
+                                  /  /   /  /         /
+                                 /      /       /    /
+                               ,---------------.   ,-,
+                              /                 `-'  |
+                             [                   |   |
+                              \                 ,-.  |
+                               `---------------'   `-`");
+            Thread.Sleep(200);
+            Console.Clear();
+
+
+            Console.WriteLine(@"
+
+
+
+
+                                    /
+                                   /    /
+                                  /  /    /         /
+                                 /    /       /    /
+                               ,-------------.   ,-,
+                              /               `-'  |
+                             [                 |   |
+                              \               ,-.  |
+                               `-------------'   `-`");
+            Thread.Sleep(200);
+            Console.Clear();
+
+
+            Console.WriteLine(@"
+
+
+
+
+
+
+                                /
+
+                               /    /
+                              /  /    /         /
+                             /    /       /    /
+                           ,-----------.   ,-,
+                          /             `-'  |
+                         [               |   |
+                          \             ,-.  |
+                           `-----------'   `-`
+
+
+
+
+
+
+
+
+                       __________________");
+
+            Thread.Sleep(200);
+            Console.Clear();
+
+
+            Console.WriteLine(@"
+
+
+
+
+
+
+
+                                
+                               /    /
+                              /  /    /
+                             /    //
+                          ,----.,-,                          
+                         [      ||
+                          `----' `-`
+
+
+
+
+                _________________________________");
+
+            Thread.Sleep(200);
+            Console.Clear();
+
+            Console.WriteLine(@"
+
+
+
+
+
+
+
+
+
+
+
+                                
+                           /    /
+                          /  /    /
+                         /    //
+                      ,----.,-,                          
+                     [      ||
+                      `----' `-`
+                _________________________________");
+
+            Thread.Sleep(200);
+            Console.Clear();
+            Console.WriteLine(@"
+
+
+
+
+
+
+
+
+            .           .   ________________    .        .                 
+                  .    ____/ (  (    )   )  \___                           
+            .         /( (  (  )   _    ))  )   )\        .   .            
+                    ((     (   )(    )  )   (   )  )   .                   
+         .    .   ((/  ( _(   )   (   _) ) (  () )  )        .   .         
+                 ( (  ( (_)   ((    (   )  .((_ ) .  )_                    
+                                         )             )                 
+                                _        _  _ _     _       .   .   .   
+ .       .     (_((__(_(__(( ( ( |  ) ) ) )_))__))_)___)   .              
+      .         ((__)        \\||lll|l||///          \_))       .          
+               .       . / (  |(||(|)|||//  \     .    .      .      .    
+    .       .           .   (   /(/ (  )  ) )\          .     .               
+                        
+-------------------------------------------------------------------------------
+                ");
+            Thread.Sleep(300);
+            Console.Clear();
+            Console.WriteLine(@"
+
+
+
+
+
+
+
+            .           .   ________________    .        .                 
+                  .    ____/ (  (    )   )  \___                           
+            .         /( (  (  )   _    ))  )   )\        .   .            
+                    ((     (   )(    )  )   (   )  )   .                   
+         .    .   ((/  ( _(   )   (   _) ) (  () )  )        .   .         
+                 ( (  ( (_)   ((    (   )  .((_ ) .  )_                    
+                                         )             )                  
+  .       .     (_((__(_(__(( ( ( |  ) ) ) )_))__))_)___)   .              
+      .         ((__)        \\||lll|l||///          \_))       .          
+               .       . / (  |(||(|)|||//  \     .    .      .      .    
+ .       .           .   (   /(/ (  )  ) )\          .     .               
+--------------------------------------------------------------------------
+                ");
+            Thread.Sleep(300);
+            Console.Clear();
+            Console.WriteLine(@"
+
+
+
+
+
+            .           .   ________________    .        .                 
+                  .    ____/ (  (    )   )  \___                           
+            .         /( (  (  )   _    ))  )   )\        .   .            
+                    ((     (   )(    )  )   (   )  )   .                   
+         .    .   ((/  ( _(   )   (   _) ) (  () )  )        .   .         
+                 ( (  ( (_)   ((    (   )  .((_ ) .  )_                    
+                                         )             )         
+  .       .     (_((__(_(__(( ( ( |  ) ) ) )_))__))_)___)   .              
+      .         ((__)        \\||lll|l||///          \_))       .          
+               .       . / (  |(||(|)|||//  \     .    .      .      .    
+ .       .           .   (   /(/ (  )  ) )\          .     .               
+     .      .    .     (  . ( ( ( | | ) ) )\   )               .            
+                        (   /(| / ( )) ) ) )) )    .   .  .       .  .  .   
+ .     .       .  .   (  .  ( ((((_(|)_)))))     )            .             
+-------------------------------------------------------------------------------
+                ");
+            Thread.Sleep(300);
+            Console.Clear();
+            Console.WriteLine(@"
+            .           .   ________________    .        .                 
+                  .    ____/ (  (    )   )  \___                           
+            .         /( (  (  )   _    ))  )   )\        .   .            
+                    ((     (   )(    )  )   (   )  )   .                   
+         .    .   ((/  ( _(   )   (   _) ) (  () )  )        .   .         
+                 ( (  ( (_)   ((    (   )  .((_ ) .  )_                    
+                                         )             )         
+  .       .     (_((__(_(__(( ( ( |  ) ) ) )_))__))_)___)   .              
+      .         ((__)        \\||lll|l||///          \_))       .          
+               .       . / (  |(||(|)|||//  \     .    .      .      .    
+ .       .           .   (   /(/ (  )  ) )\          .     .               
+     .      .    .     (  . ( ( ( | | ) ) )\   )               .            
+                        (   /(| / ( )) ) ) )) )    .   .  .       .  .  .   
+ .     .       .  .   (  .  ( ((((_(|)_)))))     )            .             
+         .  .          (    . ||\(|(|)|/|| . . )        .        .          
+     .           .   (   .    |(||(||)||||   .    ) .      .         .  .   
+ .      .      .       (     //|/l|||)|\\ \     )      .      .   .         
+                     (/ / //  /|//||||\\  \ \  \ _)                         
+-------------------------------------------------------------------------------
+                ");
+            Thread.Sleep(2500);
+
+        }
+        public static void GameScreen()
+        {
+            if (MoneyLeft < 100)
+            {
+
+
+                Console.WriteLine(@"
+Replicants are infesting the city!   .......  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+1. Automatic Dispersion Pistol (ADP) ....... @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+                                     ....... @@@@@@@@@@ oo o@@@@o @@@@@@@@@oooo
+2. 45 Caliber Anti-Matter Pistol     ....... @@@ @a0000000000000000a  a00000a00
+                                     ....... @@@@ 0000000000000000000 000000000
+3. Resupply Drop                     ........ @@ 0000 0000000000000000000000000
+                                     ........ @@@ 0000 000000000000000000000000
+4. Katana                            ........ @@@ 000 0000000000000000000000000
+                                     ........ @@@ 000 0000000000000000000000000
+5. EMP Grenade                       ......... @@@ 00 00000000000 00000 0000000
+                                     ...... 00;.                 aaaaa a       
+6. Accuracy Implants                 .......0000 00000ta        /00000 000\  
+                                     .......`000 000000000000mn000000 0000mn000
+  ,-.__________________,======= ,    ....... 000 00000000000000000000 000000000
+[ (   _  _  _ )_______)  \\\\\ ((t   ........ 00 00000000000000000000 000000000
+  /================.-.______,--'_\   ......... 0 0000000000000000 00000 0000000
+  \_,__,_________\     [ ]    /      ........... 0a  00000000000 0000000 000000
+            \ (   )) )   o   (       ............ 000a00000000000mm   mm0000000
+             \ \____/    \    \      ............ 0000 000000000000000000000000
+              ' ===''\    \    \     ............  000000000000            0000
+                      \    \    \    ......        a 000000000m0000000000000000
+                       )____\   |    .....      ,' 00a 000000000          00000
+                       ) __, __,'    ...      ,'   0000a 0000000000000000000000
+                        '--''        .      ,'     `00000a 00000000000000000000
+");
+            }
+            if (MoneyLeft >= 100)
+            {
+                Console.WriteLine(@"
+Replicants are infesting the city!   .......  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+1. Automatic Dispersion Pistol (ADP) ....... @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+                                     ....... @@@@@@@@@@ oo o@@@@o @@@@@@@@@oooo
+2. 45 Caliber Anti-Matter Pistol     ....... @@@ @a0000000000000000a  a00000a00
+                                     ....... @@@@ 0000000000000000000 000000000
+3. Resupply Drop                     ........ @@ 0000 0000000000000000000000000
+                                     ........ @@@ 0000 000000000000000000000000
+4. Katana                            ........ @@@ 000 0000000000000000000000000
+                                     ........ @@@ 000 0000000000000000000000000
+5. EMP Grenade                       ......... @@@ 00 00000000000 00000 0000000
+                                     ...... 00;.                 aaaaa a       
+6. Accuracy Implants                 .......0000 00000ta        /00000 000\  
+                                     .......`000 000000000000mn000000 0000mn000
+7. --TACTICAL NUKE ONLINE--          ....... 000 00000000000000000000 000000000
+[ (   _  _  _ )_______)  \\\\\ ((t   ........ 00 00000000000000000000 000000000
+  /================.-.______,--'_\   ......... 0 0000000000000000 00000 0000000
+  \_,__,_________\     [ ]    /      ........... 0a  00000000000 0000000 000000
+            \ (   )) )   o   (       ............ 000a00000000000mm   mm0000000
+             \ \____/    \    \      ............ 0000 000000000000000000000000
+              ' ===''\    \    \     ............  000000000000            0000
+                      \    \    \    ......        a 000000000m0000000000000000
+                       )____\   |    .....      ,' 00a 000000000          00000
+                       ) __, __,'    ...      ,'   0000a 0000000000000000000000
+                        '--''        .      ,'     `00000a 00000000000000000000
+");
+     
+            }
+        }
+
 
     }
 }
