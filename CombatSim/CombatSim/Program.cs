@@ -64,6 +64,8 @@ namespace CombatSim
         static int Implants = 0;
         //total implants purcased
         static int ImplantsTotal = 0;
+        //increases difficutly
+        static int EnemySpawnChance = 150;
         static void Main(string[] args)
         {
 
@@ -80,11 +82,11 @@ namespace CombatSim
             //user prompt
             Console.WriteLine("\n                               Press Enter To Play: ");
             Console.ReadKey();
-            StoryLine();
+            //StoryLine();
 
             //set all initial gam values
             BulletsLeft = 100;
-            EnemiesLeft = rand.Next(150, 251);
+            EnemiesLeft = EnemySpawnChance;
             MoneyLeft = 50;
             //continue playing
             while (ContinuePlaying == true)
@@ -179,11 +181,20 @@ Replicants are infesting the city!   .......  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
                             YouWinAnimation();
                             Console.WriteLine("\nYou have cleared the city of Replicants!");
                             Thread.Sleep(300);
-                            
+
                             //ask if user keeps playing
                             KeepPlaying();
                             //count number of cities cleared
                             CitiesCleared++;
+                            if (CitiesCleared > 0)
+                            {
+                                for (int i = 0; i < CitiesCleared; i++)
+                                {
+                                    EnemySpawnChance = EnemySpawnChance + 20;
+
+                                    EnemiesLeft = EnemySpawnChance;
+                                }
+                            }
 
                         }
                         //when the user runs ouf of bullets/life
@@ -243,7 +254,9 @@ Replicants are infesting the city!   .......  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
                     //yes
                     case "Y":
                         //reset counters for new game
-                        EnemiesLeft = rand.Next(150, 251);
+
+
+                        MoneyLeft = 50;
                         //do not reset money, or bullets. 
                         //money is earned in the game
                         break;
@@ -973,7 +986,7 @@ $$\     $$\  $$$$$$\  $$\   $$\       $$\      $$\ $$$$$$\ $$\   $$\
                                     katanaDmg = katanaDmg + SemiAuto;
                                     //subtract damage from enemy total
                                     EnemiesLeft = EnemiesLeft - SemiAuto;
-                                    if(EnemiesLeft< 0)
+                                    if (EnemiesLeft < 0)
                                     {
                                         EnemiesLeft = 0;
                                     }
@@ -1036,17 +1049,21 @@ Chance to Hit: 55%
                         {
                             //Yes
                             case "Y":
-                                //Grenade animation
-                                GrenadeBoom();
+                                //check to see if user has money
                                 if (MoneyLeft <= 0)
                                 {
+                                    //User has NO money
                                     HeadsUpDisplay();
 
                                     Console.ForegroundColor = ConsoleColor.DarkRed;
                                     Console.WriteLine("\nYou trying to cheat me, boy?\n  You aint got the funds for these munitions.");
                                 }
+                                //user HAS money
                                 else if (MoneyLeft > 0)
                                 {
+
+                                    GrenadeBoom();
+                                    //Grenade animation
                                     MoneyLeft = MoneyLeft - 10;
                                     ChanceToHit = rand.Next(1, 101);
 
@@ -1077,10 +1094,12 @@ Chance to Hit: 55%
                                     }
                                     else
                                     {
+                                        GrenadeUsage++;
+                                        grenade = 3;
                                         //combat message
                                         HeadsUpDisplay();
                                         Console.WriteLine("\nYour grenade missed, but the explosion can be heard for miles.");
-                                        Console.WriteLine("\nReplicants have a reduced chance to reinforce for a while.");
+                                        Console.WriteLine("\nDue to the EMP Effect, \n      Replicants have a reduced chance to reinforce for a while.");
                                     }
                                 }
                                 //keep combat messages on screen
@@ -1132,7 +1151,9 @@ Chance to Hit: 55%
                                     //subtract cost
                                     MoneyLeft = MoneyLeft - 50;
                                     //activate implants for 5 rounds
-                                    Implants = 5;
+                                    //since  implants decrements after each round
+                                    //user has 5 rounds of COMBAT to use implants
+                                    Implants = 6;
                                     //change accuracy for both items
                                     APDAccuracy = 1;
                                     KatAccuracy = 20;
@@ -1384,17 +1405,27 @@ Chance to Hit: 55%
             TitleScroll();
             //cities count and implants status
             //implants on
-            if (Implants > 0)
+            if (Implants > 0 && grenade > 0)
             {
+                Console.WriteLine("  Implants: (⌐■_■) on                    Cities Cleared: {0}", CitiesCleared);
+                Console.WriteLine("EMP Effect:  \\-^-/ on                       Cities Lost: {0}", CitiesLost);
+            }
+            else if (Implants > 0)
+            {
+                Console.WriteLine("  Implants: (⌐■_■) on                    Cities Cleared: {0}", CitiesCleared);
+                Console.WriteLine("EMP Effect:  /---\\ off                      Cities Lost: {0}", CitiesLost);
+            }
+            else if (grenade > 0)
+            {
+                Console.WriteLine("  Implants: ( o_o) off                    Cities Cleared: {0}", CitiesCleared);
+                Console.WriteLine("EMP Effect:  \\-^-/ on                        Cities Lost: {0}", CitiesLost);
 
-                Console.WriteLine("Implants: (⌐■_■) on                        Cities Cleared: {0}", CitiesCleared);
-                Console.WriteLine("                                              Cities Lost: {0}", CitiesLost);
             }
             //implants off
-            else if (Implants <= 0)
+            else if (Implants <= 0 && grenade <= 0)
             {
-                Console.WriteLine("Implants: ( o_o) off                        Cities Cleared: {0}", CitiesCleared);
-                Console.WriteLine("                                               Cities Lost: {0}", CitiesLost);
+                Console.WriteLine("  Implants: ( o_o) off                    Cities Cleared: {0}", CitiesCleared);
+                Console.WriteLine("EMP Effect:  /---\\ off                       Cities Lost: {0}", CitiesLost);
             }
             //scroll through and ad """"" to bullets hud
             for (int i = 0; i < BulletsLeft; i += 2)
@@ -2087,12 +2118,13 @@ SSS            WXXXXXXW
             //enemies have a 30% chance to reinforce their numbers
             reinforcements = rand.Next(1, 101);
             //if grenade debuff is active, only 5% chance of reiforcments for 3 rounds
+
+            //enemies reinforce or don't
             if (grenade > 0)
             {
                 reinforcementChance = 95;
                 grenade--;
             }
-            //enemies reinforce or don't
             if (reinforcements > reinforcementChance)
             {
                 HeadsUpDisplay();
@@ -2116,6 +2148,7 @@ SSS            WXXXXXXW
 
                 Console.ForegroundColor = ConsoleColor.White;
             }
+
         }
 
         /// <summary>
