@@ -40,11 +40,11 @@ namespace CombatSim
         //Confirm attack type
         static string UserConfirmation = null;
         //stats
-        static int katanaAtk = 1;
+        static int katanaAtk = 0;
         static int katanaDmg = 0;
-        static int pistolAtk = 1;
+        static int pistolAtk = 0;
         static int pistolDmg = 0;
-        static int APDAtk = 1;
+        static int APDAtk = 0;
         static int APDDmg = 0;
         static int TacticalNuke = 0;
 
@@ -106,7 +106,7 @@ namespace CombatSim
                     HeadsUpDisplay();
                     //prompt
                     GameScreen();
-                    
+
                     //try to parse user input to int
                     int.TryParse(Console.ReadLine(), out UserSelection);
                     //checks case of user input
@@ -162,14 +162,17 @@ namespace CombatSim
                             Console.ForegroundColor = ConsoleColor.DarkCyan;
                             //you win!
                             YouWinAnimation();
-                            Console.WriteLine("\nYou have cleared the city of Replicants!");
-                            Thread.Sleep(300);
+
+                            Console.ForegroundColor = ConsoleColor.DarkCyan;
+                            Console.WriteLine("\nYour cash bonus is now {0} per 20 replicants killed!", MoneyReward);
+                            Thread.Sleep(500);
 
                             //ask if user keeps playing
                             KeepPlaying();
                             //count number of cities cleared
                             CitiesCleared++;
-
+                            //reset reward counter
+                            enemiesKill = 0;
 
                         }
                         //when the user runs ouf of bullets/life
@@ -187,6 +190,9 @@ namespace CombatSim
                             BulletsLeft = 100;
                             //reset money and ammo to default
                             CitiesLost++;
+                            //reset reward counter
+                            enemiesKill = 0;
+
 
                         }
 
@@ -204,11 +210,7 @@ namespace CombatSim
                         if (CitiesCleared > 0 && CitiesCleared % 2 == 0)
                         {
                             //earn an extra 5 bucks per 50 extra enemies
-                            for (int i = 0; i < CitiesCleared; i += 2)
-                            {
-                                
-                              MoneyReward = MoneyReward + 5;
-                            }
+                            MoneyReward += 5;
                             //if there are a lot of enemies, more bonus
                             if (EnemiesLeft > 250)
                             {
@@ -1222,7 +1224,7 @@ TACTICAL NUKE:
                                     EnemiesLeft = 0;
                                     //change accuracy for both items
                                     TacticalNukeAnimation();
-
+                                    TacticalNuke++;
                                 }
                                 //if user doesn't have enough money
                                 Console.WriteLine("You can't use this option yet!!!");
@@ -2222,11 +2224,21 @@ SSS            WXXXXXXW
             int APDStat = 0;
             int totalDmg = 0;
             int totalAtk = 0;
-            katanaStat = katanaDmg / katanaAtk;
-            pistolStat = pistolDmg / pistolAtk;
-            APDStat = APDDmg / APDAtk;
+            if (katanaAtk > 0)
+            {
+                katanaStat = katanaDmg / katanaAtk;
+            }
+            if (pistolAtk > 0)
+            {
+
+                pistolStat = pistolDmg / (pistolAtk - 1);
+            }
+            if (APDAtk > 0)
+            {
+                APDStat = APDDmg / (APDAtk - 1);
+            }
             totalDmg = katanaDmg + pistolDmg + APDDmg;
-            totalAtk = katanaAtk + pistolAtk + APDAtk;
+            totalAtk = (katanaAtk + pistolAtk + APDAtk);
 
             int totalStat = totalDmg / totalAtk;
             CityLogo();
@@ -2241,7 +2253,7 @@ SSS            WXXXXXXW
             Thread.Sleep(500);
             Console.WriteLine("You did an average of {0} damage with the Side-Arm.", pistolStat);
             Thread.Sleep(500);
-            Console.WriteLine("You did an average of {0} damage with the KATANA.", pistolStat);
+            Console.WriteLine("You did an average of {0} damage with the KATANA.", katanaStat);
             Thread.Sleep(500);
             Console.WriteLine("           You bought {0} grenades", GrenadeUsage);
             Thread.Sleep(500);
@@ -2250,6 +2262,8 @@ SSS            WXXXXXXW
             Console.WriteLine("             You used {0} implants.", ImplantsTotal);
             Thread.Sleep(500);
             Console.WriteLine("          You earned ${0}.", CashEarned);
+            Thread.Sleep(500);
+            Console.WriteLine("             You used {0} Tactical Nukes.", TacticalNuke);
             Thread.Sleep(500);
             Console.WriteLine("\nYou did an overall average of {0} damage.", totalStat);
             Thread.Sleep(500);
@@ -2407,14 +2421,14 @@ SSS            WXXXXXXW
                 newMoney = enemiesKill / 20;
                 newMoney = newMoney * 5;
                 MoneyLeft = MoneyLeft + newMoney + MoneyReward;
-                CashEarned = CashEarned + newMoney;
-                Console.WriteLine("\nYou killed {1} enemies.\n\n${0} added to your stash.", newMoney, enemiesKill);
+                CashEarned = CashEarned + MoneyReward + newMoney;
+                Console.WriteLine("\nYou killed {1} enemies.\n\n ${0} added to your stash.", MoneyReward + newMoney, enemiesKill);
                 //while subtracting 25 is not negative
-                while (enemiesKill - 25 > 0)
+                while (enemiesKill - 20 > 0)
                 {
                     //subtract 25
                     //this old kills aren't lost
-                    enemiesKill = enemiesKill - 25;
+                    enemiesKill -= 20;
                 }
 
                 Console.WriteLine("\nPress any key to continue: ");
@@ -2422,6 +2436,9 @@ SSS            WXXXXXXW
                 Console.ForegroundColor = ConsoleColor.White;
             }
         }
+        /// <summary>
+        /// tatctical nuke animation
+        /// </summary>
         public static void TacticalNukeAnimation()
         {
             Console.ForegroundColor = ConsoleColor.DarkRed;
@@ -2667,6 +2684,10 @@ SSS            WXXXXXXW
             Thread.Sleep(2500);
 
         }
+
+        /// <summary>
+        /// different display screens for whether tactical nuke is available
+        /// </summary>
         public static void GameScreen()
         {
             if (MoneyLeft < 100)
@@ -2728,7 +2749,7 @@ Replicants are infesting the city!   .......  @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
                        ) __, __,'    ...      ,'   0000a 0000000000000000000000
                         '--''        .      ,'     `00000a 00000000000000000000
 ");
-     
+
             }
         }
 
