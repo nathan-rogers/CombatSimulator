@@ -89,7 +89,7 @@ namespace CombatSim
             //user prompt
             Console.WriteLine("\n                               Press Enter To Play: ");
             Console.ReadKey();
-            //StoryLine();
+            StoryLine();
 
             //set all initial gam values
             BulletsLeft = 100;
@@ -163,9 +163,6 @@ namespace CombatSim
                             //you win!
                             YouWinAnimation();
 
-                            Console.ForegroundColor = ConsoleColor.DarkCyan;
-                            Console.WriteLine("\nYour cash bonus is now {0} per 20 replicants killed!", MoneyReward);
-                            Thread.Sleep(500);
 
                             //ask if user keeps playing
                             KeepPlaying();
@@ -1463,7 +1460,7 @@ TACTICAL NUKE:
             TitleScroll();
             //cities count and implants status
             //displays current level
-            Console.WriteLine("                                                   Level: {0}", LevelCounter);
+            Console.WriteLine("Cash Bonus: ${1}/20 kills                            Level: {0}", LevelCounter, 5 + MoneyReward);
             //implants on
             if (Implants > 0 && grenade > 0)
             {
