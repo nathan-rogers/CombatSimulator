@@ -47,6 +47,7 @@ namespace CombatSim
         static int APDAtk = 0;
         static int APDDmg = 0;
         static int TacticalNuke = 0;
+        static int MoneyIncrement = 0;
 
         //tracks enemy kills for cash rewards
         static int enemiesKill = 0;
@@ -1223,8 +1224,13 @@ TACTICAL NUKE:
                                     TacticalNukeAnimation();
                                     TacticalNuke++;
                                 }
-                                //if user doesn't have enough money
-                                Console.WriteLine("You can't use this option yet!!!");
+                                    //user doesn't have enough money
+                                else if (MoneyLeft < 100)
+                                {
+
+                                    //if user doesn't have enough money
+                                    Console.WriteLine("You can't use this option yet!!!");
+                                }
                                 //keep combat messages on screen
                                 Console.WriteLine("\nPress Enter: ");
                                 Console.ReadKey();
@@ -2415,11 +2421,12 @@ SSS            WXXXXXXW
                 HeadsUpDisplay();
                 Console.ForegroundColor = ConsoleColor.DarkRed;
                 //for every 20 kills get 5 bucks
-                newMoney = enemiesKill / 20;
-                newMoney = newMoney * 5;
-                MoneyLeft = MoneyLeft + newMoney + MoneyReward;
-                CashEarned = CashEarned + MoneyReward + newMoney;
-                Console.WriteLine("\nYou killed {1} enemies.\n\n ${0} added to your stash.", MoneyReward + newMoney, enemiesKill);
+                //how many increments are payed out
+                MoneyIncrement = enemiesKill / 20;
+                newMoney = MoneyIncrement * 5;
+                MoneyLeft = MoneyLeft + newMoney + (MoneyReward * MoneyIncrement);
+                CashEarned = CashEarned + (MoneyReward * MoneyIncrement) + newMoney;
+                Console.WriteLine("\nYou killed {1} enemies.\n\n ${0} added to your stash.", (MoneyReward * MoneyIncrement)+ newMoney, enemiesKill);
                 //while subtracting 25 is not negative
                 while (enemiesKill - 20 > 0)
                 {
